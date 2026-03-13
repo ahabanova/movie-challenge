@@ -1,6 +1,8 @@
 
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using MovieChallenge.API.Data;
+using MovieChallenge.API.Models;
 
 namespace MovieChallenge.API
 {
@@ -17,6 +19,10 @@ namespace MovieChallenge.API
 
             builder.Services.AddDbContext<AppDbContext>(options =>
                 options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+            builder.Services.AddIdentity<AppUser, IdentityRole>()
+                .AddEntityFrameworkStores<AppDbContext>()
+                .AddDefaultTokenProviders();
 
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
