@@ -1,4 +1,7 @@
 
+using Microsoft.EntityFrameworkCore;
+using MovieChallenge.API.Data;
+
 namespace MovieChallenge.API
 {
     public class Program
@@ -11,6 +14,10 @@ namespace MovieChallenge.API
 
             builder.Services.AddControllers();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+
+            builder.Services.AddDbContext<AppDbContext>(options =>
+                options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
