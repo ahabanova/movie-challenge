@@ -37,13 +37,15 @@ namespace MovieChallenge.API.Controllers
                 
                 Email = data.Email,
                 UserName = data.Email,
-                Name = data.Name,
+                Name = data.Name
             };
+
 
             var result = await _userManager.CreateAsync(user, data.Password);
             
             if (result.Succeeded)
             {
+                await _userManager.AddToRoleAsync(user, "User");
                 return Ok("Registrace proběhla úspěšně");
             }
 
@@ -59,7 +61,7 @@ namespace MovieChallenge.API.Controllers
                 var correctPassword = await _userManager.CheckPasswordAsync(user, data.Password);
 
                 if (correctPassword)
-                    return Ok(GenerateJwtToken(user));
+                    return Ok(await GenerateJwtToken(user));
                 else
                     return Unauthorized("Nesprávné heslo");
             }
@@ -67,14 +69,20 @@ namespace MovieChallenge.API.Controllers
             return Unauthorized("Uživatel nenalezen");
         }
 
-        private string GenerateJwtToken(AppUser user)
+        private async Task<string> GenerateJwtToken(AppUser user)
         {
+            var roles = await _userManager.GetRolesAsync(user);
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.NameIdentifier, user.Id),
                 new Claim(ClaimTypes.Email, user.Email!),
                 new Claim(ClaimTypes.Name, user.Name),
             };
+
+            foreach (var role in roles)
+            {
+                claims.Add(new Claim(ClaimTypes.Role, role));
+            }
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:SecretKey"]!));
             var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);

@@ -11,7 +11,7 @@ namespace MovieChallenge.API
 {
     public class Program
     {
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
 
@@ -67,6 +67,12 @@ namespace MovieChallenge.API
             app.UseAuthorization();
 
             app.MapControllers();
+
+            using (var scope = app.Services.CreateScope())
+            {
+                var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+                await DbSeeder.SeedAsync(roleManager);
+            }
 
             app.Run();
         }
