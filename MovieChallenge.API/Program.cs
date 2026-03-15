@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using MovieChallenge.API.Data;
 using MovieChallenge.API.Models;
 using System.Text;
@@ -57,8 +58,32 @@ namespace MovieChallenge.API
             );
 
             builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddSwaggerGen();
-
+            builder.Services.AddSwaggerGen(options =>
+            {
+                options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+                {
+                    Name = "Authorization",
+                    Type = SecuritySchemeType.ApiKey,
+                    Scheme = "Bearer",
+                    BearerFormat = "JWT",
+                    In = ParameterLocation.Header,
+                    Description = "Zadej JWT token takto: Bearer {token}"
+                });
+                options.AddSecurityRequirement(new OpenApiSecurityRequirement
+                {
+                    {
+                        new OpenApiSecurityScheme
+                        {
+                            Reference = new OpenApiReference
+                            {
+                                Type = ReferenceType.SecurityScheme,
+                                Id = "Bearer"
+                            }
+                        },
+                        new string[] {}
+                    }
+                });
+            });
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
@@ -79,7 +104,10 @@ namespace MovieChallenge.API
             using (var scope = app.Services.CreateScope())
             {
                 var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-                await DbSeeder.SeedAsync(roleManager);
+                var userManager = scope.ServiceProvider.GetRequiredService<UserManager<AppUser>>();
+                var configuration = scope.ServiceProvider.GetRequiredService<IConfiguration>();
+
+                await DbSeeder.SeedAsync(roleManager, userManager, configuration);
             }
 
             app.Run();
