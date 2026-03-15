@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using MovieChallenge.API.Data;
 using MovieChallenge.API.DTOs.Auth;
 using MovieChallenge.API.DTOs.Challenges;
+using MovieChallenge.API.DTOs.Categories;
 using MovieChallenge.API.Models;
 
 namespace MovieChallenge.API.Controllers
@@ -22,7 +23,15 @@ namespace MovieChallenge.API.Controllers
         [HttpGet]
         public async Task<IActionResult> GetChallenges()
         {
-            var challenges = await _db.Challenges.ToListAsync();
+            var challenges = await _db.Challenges
+                .Select(ch => new ChallengeDto
+                {
+                    Id = ch.Id,
+                    Year = ch.Year,
+                    Title = ch.Title,
+                    IsActive = ch.IsActive
+                })
+                .ToListAsync();
             return Ok(challenges);
         }
 
@@ -33,7 +42,20 @@ namespace MovieChallenge.API.Controllers
                 .Include(ch => ch.Categories)
                 .FirstOrDefaultAsync(ch => ch.Id == id);
             if (challenge == null) return NotFound("Výzva nenalezena");
-            return Ok(challenge);
+
+            var challengeDto = new ChallengeDetailDto
+            {
+                Id = challenge.Id,
+                Year = challenge.Year,
+                Title = challenge.Title,
+                IsActive = challenge.IsActive,
+                Categories = challenge.Categories.Select(cat => new CategoryDto
+                {
+                    Id = cat.Id,
+                    Assignment = cat.Assignment
+                }).ToList()
+            };
+            return Ok(challengeDto);
         }
 
         [HttpPost]
@@ -49,7 +71,16 @@ namespace MovieChallenge.API.Controllers
             };
             _db.Challenges.Add(challenge);
             await _db.SaveChangesAsync();
-            return Ok(challenge);
+
+            var challengeDto = new ChallengeDto
+            {
+                Id = challenge.Id,
+                Year = challenge.Year,
+                Title = challenge.Title,
+                IsActive = challenge.IsActive
+            };
+
+            return Ok(challengeDto);
         }
 
         [HttpPut("{id}")]
@@ -63,7 +94,16 @@ namespace MovieChallenge.API.Controllers
             challenge.Title = data.Title;
             challenge.IsActive = data.IsActive;
             await _db.SaveChangesAsync();
-            return Ok(challenge);
+
+            var challengeDto = new ChallengeDto
+            {
+                Id = challenge.Id,
+                Year = challenge.Year,
+                Title = challenge.Title,
+                IsActive = challenge.IsActive
+            };
+
+            return Ok(challengeDto);
         }
 
         [HttpDelete("{id}")]
