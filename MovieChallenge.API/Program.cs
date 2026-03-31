@@ -6,6 +6,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using MovieChallenge.API.Data;
 using MovieChallenge.API.Models;
+using MovieChallenge.API.Services;
 using System.Text;
 
 namespace MovieChallenge.API
@@ -23,6 +24,12 @@ namespace MovieChallenge.API
 
             builder.Services.AddDbContext<AppDbContext>(options =>
                 options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+            builder.Services.AddHttpClient<TmdbService>(client =>
+            {
+                client.BaseAddress = new Uri(builder.Configuration["TMDb:BaseUrl"]!);
+            });
+            builder.Services.AddScoped<TmdbService>();
 
             builder.Services.AddIdentity<AppUser, IdentityRole>(options =>
             {
