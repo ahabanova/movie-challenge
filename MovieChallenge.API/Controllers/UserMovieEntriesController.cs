@@ -50,7 +50,6 @@ namespace MovieChallenge.API.Controllers
                     {
                         Id = e.Movie.Id,
                         CzechTitle = e.Movie.CzechTitle,
-                        EnglishTitle = e.Movie.EnglishTitle,
                         OriginalTitle = e.Movie.OriginalTitle,
                         Overview = e.Movie.Overview,
                         PosterUrl = e.Movie.PosterUrl,
@@ -124,7 +123,6 @@ namespace MovieChallenge.API.Controllers
                 {
                     Id = movie.Id,
                     CzechTitle = movie.CzechTitle,
-                    EnglishTitle = movie.EnglishTitle,
                     OriginalTitle = movie.OriginalTitle,
                     Overview = movie.Overview,
                     PosterUrl = movie.PosterUrl,
@@ -184,7 +182,6 @@ namespace MovieChallenge.API.Controllers
                 {
                     Id = movie.Id,
                     CzechTitle = movie.CzechTitle,
-                    EnglishTitle = movie.EnglishTitle,
                     OriginalTitle = movie.OriginalTitle,
                     Overview = movie.Overview,
                     PosterUrl = movie.PosterUrl,

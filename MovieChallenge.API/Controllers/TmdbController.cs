@@ -11,11 +11,19 @@ namespace MovieChallenge.API.Controllers
     {
         private readonly AppDbContext _db;
         private readonly TmdbService _tmdbService;
- 
+
         public TmdbController(AppDbContext db, TmdbService tmdbService)
         {
             _db = db;
             _tmdbService = tmdbService;
+        }
+
+        [HttpGet("search")]
+        public async Task<IActionResult> SearchMovies(string query)
+        {
+            if (string.IsNullOrWhiteSpace(query)) return BadRequest("Query cannot be empty");
+            var results = await _tmdbService.SearchMoviesAsync(query);
+            return Ok(results);
         }
     }
 }

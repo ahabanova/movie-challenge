@@ -14,7 +14,7 @@ namespace MovieChallenge.API.Services
 
         public async Task<List<TmdbSearchResultDto>> SearchMoviesAsync(string movieName)
         {
-            var response = await _httpClient.GetAsync($"/search/movie?query={movieName}&include_adult=true&language=cs&api_key={_apiKey}");
+            var response = await _httpClient.GetAsync($"https://api.themoviedb.org/3/search/movie?query={movieName}&language=cs&api_key={_apiKey}");
             response.EnsureSuccessStatusCode();
 
             var result = await response.Content.ReadFromJsonAsync<TmdbSearchResponseDto>();
