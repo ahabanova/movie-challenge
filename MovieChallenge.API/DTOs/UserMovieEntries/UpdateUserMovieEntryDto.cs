@@ -2,7 +2,7 @@
 {
     public class UpdateUserMovieEntryDto
     {
-        public int MovieId { get; set; }
+        public int TmdbId { get; set; }
         public string Description { get; set; } = string.Empty;
         public int? Rating { get; set; }
     }

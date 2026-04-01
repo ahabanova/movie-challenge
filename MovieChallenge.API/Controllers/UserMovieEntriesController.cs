@@ -8,6 +8,7 @@ using MovieChallenge.API.DTOs.Movies;
 using MovieChallenge.API.Models;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
+using MovieChallenge.API.Services;
 
 namespace MovieChallenge.API.Controllers
 {
@@ -16,10 +17,12 @@ namespace MovieChallenge.API.Controllers
     public class UserMovieEntriesController : ControllerBase
     {
         private readonly AppDbContext _db;
+        private readonly TmdbService _tmdbService;
 
-        public UserMovieEntriesController(AppDbContext db)
+        public UserMovieEntriesController(AppDbContext db, TmdbService tmdbService)
         {
             _db = db;
+            _tmdbService = tmdbService;
         }
 
         [Authorize]
@@ -81,15 +84,11 @@ namespace MovieChallenge.API.Controllers
             var category = await _db.Categories.FirstOrDefaultAsync(c => c.Id == data.CategoryId);
             if (category == null) return NotFound("Kategorie nenalezena");
 
-            var movie = await _db.Movies.FirstOrDefaultAsync(m => m.Id == data.MovieId);
-            if (movie == null)
-            {
-                movie = new Movie
-                {
-                    //TODO z tmdb
-                };
-                _db.Movies.Add(movie);
-            }
+            var movieId = await _tmdbService.GetMovieDetailsAsync(data.TmdbId);
+            if (movieId == 0) return BadRequest("Film nenalezen v TMDb");
+
+            var movie = await _db.Movies.FindAsync(movieId);
+            if (movie == null) return NotFound("Film nenalezen v databázi");
 
             var entry = new UserMovieEntry
             {
@@ -98,7 +97,7 @@ namespace MovieChallenge.API.Controllers
                 DateAdded = DateTime.UtcNow,
                 Description = data.Description,
                 Movie = movie,
-                MovieId = data.MovieId,
+                MovieId = movieId,
                 Rating = data.Rating,
                 UserId = userId,
                 User = user,
@@ -148,17 +147,13 @@ namespace MovieChallenge.API.Controllers
 
             if (entry.UserId != User.FindFirst(ClaimTypes.NameIdentifier)?.Value) return Forbid();
 
-            var movie = await _db.Movies.FirstOrDefaultAsync(m => m.Id == data.MovieId);
-            if (movie == null)
-            {
-                movie = new Movie
-                {
-                    //TODO z tmdb
-                };
-                _db.Movies.Add(movie);
-            }
+            var movieId = await _tmdbService.GetMovieDetailsAsync(data.TmdbId);
+            if (movieId == 0) return BadRequest("Film nenalezen v TMDb");
 
-            entry.MovieId = data.MovieId;
+            var movie = await _db.Movies.FindAsync(movieId);
+            if (movie == null) return NotFound("Film nenalezen v databázi");
+
+            entry.MovieId = movieId;
             entry.Movie = movie;
             entry.Description = data.Description;
             entry.Rating = data.Rating;
