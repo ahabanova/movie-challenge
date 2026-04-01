@@ -91,7 +91,20 @@ namespace MovieChallenge.API
                     }
                 });
             });
+
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("AllowVue", policy =>
+                {
+                    policy.WithOrigins("http://localhost:5173")
+                          .AllowAnyMethod()
+                          .AllowAnyHeader()
+                          .AllowCredentials();
+                });
+            });
+
             var app = builder.Build();
+
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
@@ -101,6 +114,8 @@ namespace MovieChallenge.API
             }
 
             app.UseHttpsRedirection();
+
+            app.UseCors("AllowVue");
 
             app.UseAuthentication();
 
